@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medical Semiology 4 Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Khmer:wght@400;500;600;700&family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans Khmer', 'Open Sans', sans-serif;
+        }
+        .quiz-container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background-color: #ffffff;
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .option-btn {
+            transition: all 0.2s ease-in-out;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: center;
+            line-height: 1.6;
+        }
+        .option-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .selected {
+            background-color: #e0e7ff !important;
+            border-color: #6366f1 !important;
+            color: #3730a3;
+        }
+        .correct {
+            background-color: #d1fae5 !important;
+            border-color: #10b981 !important;
+            color: #065f46 !important;
+        }
+        .incorrect {
+            background-color: #fee2e2 !important;
+            border-color: #ef4444 !important;
+            color: #991b1b !important;
+        }
+        .question-nav-btn {
+            transition: all 0.2s ease-in-out;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+        .question-nav-btn.active {
+            background-color: #4f46e5;
+            color: white;
+            border-color: #4f46e5;
+        }
+        .question-nav-btn.answered-correct {
+            background-color: #bfdbfe;
+            border-color: #60a5fa;
+            color: #1e40af;
+        }
+        .question-nav-btn.answered-incorrect {
+            background-color: #fecaca;
+            border-color: #f87171;
+            color: #991b1b;
+        }
+        .question-nav-btn:hover:not(.active) {
+            background-color: #f3f4f6;
+        }
+        .edit-input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            margin-top: 4px;
+        }
+        .edit-label {
+            font-weight: 500;
+            color: #374151;
+            margin-top: 12px;
+            display: block;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen py-8">
+
+    <div id="quiz-container" class="quiz-container w-full">
+        
+        <div class="text-center mb-8 relative">
+            <h1 class="text-3xl font-bold text-gray-800">Medical Semiology 4</h1>
+            <p id="quiz-subtitle" class="text-gray-500 mt-2">Comprehensive QCM Review</p>
+            <div class="absolute top-0 left-0 flex gap-2">
+                <button id="practice-sheet-btn" class="bg-blue-100 text-blue-700 font-semibold py-2 px-4 rounded-lg hover:bg-blue-200 text-sm">Practice Sheet</button>
+                <button id="show-all-btn" class="bg-green-100 text-green-700 font-semibold py-2 px-4 rounded-lg hover:bg-green-200 text-sm">Show Answers</button>
+            </div>
+            <button id="edit-quiz-btn" class="absolute top-0 right-0 bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded-lg hover:bg-gray-300 text-sm">Edit Quiz</button>
+        </div>
+
+        <div class="text-center mb-6">
+            <div class="inline-flex rounded-md shadow-sm flex-wrap justify-center" role="group">
+                <button id="part1-btn" type="button" class="py-2 px-4 text-sm font-medium text-white bg-indigo-600 rounded-l-lg border border-gray-200 hover:bg-indigo-700 focus:z-10 focus:ring-2 focus:ring-indigo-500">Part 1</button>
+                <button id="part2-btn" type="button" class="py-2 px-4 text-sm font-medium text-gray-900 bg-white border-t border-b border-gray-200 hover:bg-gray-100 focus:z-10 focus:ring-2 focus:ring-indigo-500">Part 2</button>
+                <button id="part3-btn" type="button" class="py-2 px-4 text-sm font-medium text-gray-900 bg-white border border-gray-200 hover:bg-gray-100 focus:z-10 focus:ring-2 focus:ring-indigo-500">Part 3</button>
+                <button id="part4-btn" type="button" class="py-2 px-4 text-sm font-medium text-gray-900 bg-white border-t border-b border-gray-200 hover:bg-gray-100 focus:z-10 focus:ring-2 focus:ring-indigo-500">Part 4</button>
+                <button id="part5-btn" type="button" class="py-2 px-4 text-sm font-medium text-gray-900 bg-white border border-gray-200 hover:bg-gray-100 focus:z-10 focus:ring-2 focus:ring-indigo-500">Part 5</button>
+                <button id="part6-btn" type="button" class="py-2 px-4 text-sm font-medium text-gray-900 bg-white border-t border-b border-r rounded-r-lg border-gray-200 hover:bg-gray-100 focus:z-10 focus:ring-2 focus:ring-indigo-500">Part 6</button>
+            </div>
+        </div>
+
+        <div id="quiz-view">
+            <div class="flex justify-between items-center mb-4">
+                 <div id="main-score-text" class="text-lg font-bold text-indigo-600"></div>
+                 <button id="redo-part-btn" class="bg-orange-100 text-orange-700 font-semibold py-2 px-4 rounded-lg hover:bg-orange-200 text-sm">Redo Part</button>
+            </div>
+            <div id="question-navigation" class="flex flex-wrap justify-center gap-2 mb-6"></div>
+
+            <div id="question-area" class="mb-8">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 id="question-number" class="text-xl font-semibold text-gray-700"></h2>
+                </div>
+                <div id="question-text" class="text-lg text-gray-800 leading-relaxed font-medium"></div>
+            </div>
+
+            <div id="answer-area"></div>
+            <div id="feedback-area" class="mt-6 text-center text-lg font-medium"></div>
+
+            <div class="mt-6 text-center">
+                <button id="redo-btn" class="hidden bg-yellow-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-yellow-600 transition-colors duration-300 shadow-lg">
+                    Redo Question
+                </button>
+            </div>
+
+            <div class="mt-4 flex justify-between items-center">
+                <button id="prev-btn" class="bg-gray-500 text-white font-bold py-3 px-8 rounded-lg hover:bg-gray-600 transition-colors duration-300 shadow-lg hidden">
+                    <span class="font-semibold">&larr; Previous</span>
+                </button>
+                <button id="next-btn" class="bg-indigo-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-indigo-700 transition-colors duration-300 shadow-lg hidden ml-auto">
+                    <span class="font-semibold">Next Question</span>
+                </button>
+            </div>
+
+            <div id="results-area" class="hidden text-center">
+                <div class="mb-4">
+                    <h2 class="text-4xl font-extrabold text-gray-800">Quiz Complete!</h2>
+                </div>
+                <p id="results-score" class="text-2xl text-gray-600 mb-6"></p>
+                <div id="summary" class="text-left mt-8 bg-gray-50 p-6 rounded-lg">
+                    <div class="text-center">
+                        <h3 class="text-xl font-bold text-gray-700">Review Your Answers:</h3>
+                    </div>
+                </div>
+                <button id="restart-btn" class="mt-8 bg-indigo-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-indigo-700 transition-colors duration-300 shadow-lg">
+                    <span class="font-semibold">Play Again</span>
+                </button>
+            </div>
+        </div>
+
+        <div id="practice-sheet-view" class="hidden"></div>
+        <div id="all-questions-view" class="hidden"></div>
+
+        <div id="edit-view" class="hidden">
+            <h2 class="text-2xl font-bold text-center mb-6">Edit Quiz Questions</h2>
+            <div id="edit-question-navigation" class="flex flex-wrap justify-center gap-2 mb-6"></div>
+            <div id="edit-questions-container"></div>
+            <div class="flex justify-between items-start mt-8">
+                <button id="add-question-btn" class="bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700">Add Question</button>
+                <div>
+                    <button id="cancel-edit-btn" class="bg-gray-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-gray-600 mr-4">Cancel</button>
+                    <button id="apply-preview-btn" class="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700">Apply to Preview</button>
+                    <button id="generate-save-code-btn" class="bg-purple-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-purple-700 ml-4">Generate Save Code</button>
+                </div>
+            </div>
+            <div id="export-area" class="hidden mt-6 p-4 border-2 border-dashed border-purple-400 rounded-lg bg-purple-50">
+                <h3 class="text-lg font-semibold text-purple-800">How to Save Your Changes Permanently</h3>
+                <ol class="list-decimal list-inside text-gray-700 space-y-2 mt-2">
+                    <li>All the code for your updated quiz is in the text box below.</li>
+                    <li>Click anywhere in the box to automatically copy all the code.</li>
+                    <li>Paste the copied code in a new message and send it to me.</li>
+                    <li>I will then update the file for you with your permanent changes.</li>
+                </ol>
+                <textarea id="export-output" readonly class="w-full h-64 p-2 border rounded-md bg-gray-100 font-mono text-sm focus:ring-2 focus:ring-indigo-500 mt-4 cursor-pointer"></textarea>
+                <p id="copy-feedback" class="text-purple-700 font-medium text-sm mt-2 h-4"></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        
+        let quizDataPart1 = [
+            { number: 1, type: "mcq", question: { en: "1/ The main cause of fungal meningitis is:" }, options: { en: ["Mucus", "Candida", "Aspergillus", "Cryptococcus neoformans"] }, answer: { en: ["Cryptococcus neoformans"] } },
+            { number: 2, type: "mcq", question: { en: "2/ All the following are the phases of menstrual cycle but except:" }, options: { en: ["Luteal phase", "Menstrual phase", "Proliferative phase", "Secretary phase"] }, answer: { en: ["Secretary phase"] } },
+            { number: 3, type: "mcq", question: { en: "3/ All the following are the functions of uterine tube but except:" }, options: { en: ["Transport the embryo undergoing cleavage to the uterus", "Nourish both the oocyte and sperm", "Provide the place for fertilization", "Catch the ovulated primary oocyte"] }, answer: { en: ["Catch the ovulated primary oocyte"] } },
+            { number: 4, type: "mcq", question: { en: "4/ Causative agents of acute otitis media are:" }, options: { en: ["S. Pneumonia, H. Influenzae, M catarrhalls", "C. Diphtheriae, Rhinovirus, EBV", "S. Mutans, M. Pneumonia, CMV", "Respiratory syncytial virus, bordetella pertussis M. Pneumonia"] }, answer: { en: ["S. Pneumonia, H. Influenzae, M catarrhalls"] } },
+            { number: 5, type: "mcq", question: { en: "5/ All the following are the point that breast inspection findings but except:" }, options: { en: ["Skin dimpling", "Lymphadenopathy", "Visible lump", "Peau d’orange"] }, answer: { en: ["Lymphadenopathy"] } },
+            { number: 6, type: "mcq", question: { en: "6/ All the following are the cause of pelvic pain but except:" }, options: { en: ["Pelvic inflammatory disease", "Uterine mess", "Complication of ovarian cyst", "Missed abortion"] }, answer: { en: ["Uterine mess"] } },
+            { number: 7, type: "mcq", question: { en: "7/ All the following are clinical features of typhoid fever but except:" }, options: { en: ["Prolonged high fever up to 4 weeks", "Arthralgia and myalgia", "Rash appears on second week", "Relative bradycardia"] }, answer: { en: ["Rash appears on second week"] } },
+            { number: 8, type: "mcq", question: { en: "8/ All the following are signs and symptoms of pulmonary tuberculosis but except:" }, options: { en: ["Chills", "Night sweats", "Extreme fatigue", "Weight loss"] }, answer: { en: ["Chills"] } },
+            { number: 9, type: "mcq", question: { en: "9/ Koplik spots (buccal mucosa) appears 2 days prior to rash of:" }, options: { en: ["Primary HIV infections", "Rubella", "Varicella", "Measles"] }, answer: { en: ["Measles"] } },
+            { number: 10, type: "mcq", question: { en: "10/ Which statement is exact related to definition of nosocomial infection?" }, options: { en: ["Infection within 48 hours of hospital admission, 3 days of discharge or 15 days of an operation", "Infection within 48 hours of hospital admission, 3 days of discharge or 30 days of an operation", "Infection within 24 hours of hospital admission, 5 days of discharge or 15 days of an operation", "Infection within 48 hours of hospital admission, 5 days of discharge or 30 days of an operation"] }, answer: { en: ["Infection within 48 hours of hospital admission, 3 days of discharge or 30 days of an operation"] } },
+            { number: 11, type: "mcq", question: { en: "11/ All the following are clinical features that suggest the diagnosis of acute meningitis but except:" }, options: { en: ["Neck stiffness", "Jaundice", "Vomiting", "Fever"] }, answer: { en: ["Jaundice"] } },
+            { number: 12, type: "mcq", question: { en: "12/ Type of rash (German Measles) in rubella is:" }, options: { en: ["Papulo-vesicular Rash", "Maculo-papular Rash", "Ulcerative Rash", "Petechial rash"] }, answer: { en: ["Maculo-papular Rash"] } },
+            { number: 13, type: "mcq", question: { en: "13/ All following are the causes of pelvic pain in gynecology but except:" }, options: { en: ["Cystitis", "Mittelschmerz", "Endometriosis", "Ectopic pregnancy"] }, answer: { en: ["Cystitis"] } },
+            { number: 14, type: "mcq", question: { en: "14/ The breast examination will be done if possible:" }, options: { en: ["15 days after the period/menstruation", "20 days after the period/menstruation", "10 days after the period/menstruation", "14 days after the period/menstruation"] }, answer: { en: ["10 days after the period/menstruation"] } },
+            { number: 15, type: "mcq", question: { en: "15/ The incubation period of measles is:" }, options: { en: ["10 days", "5 days", "20 days", "15 days"] }, answer: { en: ["10 days"] } }
+        ];
+
+        let quizDataPart2 = [
+            { number: 16, type: "mcq", question: { en: "16/ All the following are early findings of breast cancer but except:" }, options: { en: ["Skin retraction", "No palpable mass", "Single and non tender mass", "Mammographic abnormalities"] }, answer: { en: ["Single and non tender mass"] } },
+            { number: 17, type: "mcq", question: { en: "17/ All the following are the cause abnormal menstrual bleeding but except:" }, options: { en: ["Dysfunctional bleeding", "Coagulopathy", "Endometrial hyperplasia", "Uterine pathology"] }, answer: { en: ["Endometrial hyperplasia"] } },
+            { number: 18, type: "mcq", question: { en: "18/ All the following are advantages of PET with 18F-FDG Scan but except:" }, options: { en: ["Vasculitis", "Polyneuritis", "Organ transplantation", "Inflammatory bowel diseases"] }, answer: { en: ["Polyneuritis"] } },
+            { number: 19, type: "mcq", question: { en: "19/ All the following are the functions of Sertoli cells but except:" }, options: { en: ["Support, protection, and nutrition of developing spermatozoa", "Formation of blood-testis barrier", "Phagocytosis of excess spermatozoa during spermiogenesis", "Production of hormones [anti-mullerian hormone, Inhibin]"] }, answer: { en: ["Production of hormones [anti-mullerian hormone, Inhibin]"] } },
+            { number: 20, type: "mcq", question: { en: "20/ The most common cause of cerebral abscess in AIDS patients:" }, options: { en: ["Cerebral Tuberculosis", "Progressive multifocal leukoencephalopathy", "Cerebral lymphoma", "Cerebral toxoplasmosis"] }, answer: { en: ["Cerebral toxoplasmosis"] } },
+            { number: 21, type: "mcq", question: { en: "21/ All the following are causes of nipple discharge but except:" }, options: { en: ["Simple breast cyst", "Subareolar duct ectasia", "Intraductal carcinoma", "Intraductal papilloma"] }, answer: { en: ["Simple breast cyst"] } },
+            { number: 22, type: "mcq", question: { en: "22/ Which one is the most common bacteria caused otitis media?" }, options: { en: ["Klebsiella pneumonia", "Haemophilus influenzae", "Mycoplasma pneumonia", "Staphylococcus aureus"] }, answer: { en: ["Staphylococcus aureus"] } },
+            { number: 23, type: "mcq", question: { en: "23/ What causes abnormal menstrual bleeding?" }, options: { en: ["Cervicitis", "Dysfunctional bleeding", "Cervical cancer", "Endometrial hyperplasia"] }, answer: { en: ["Dysfunctional bleeding"] } },
+            { number: 24, type: "mcq", question: { en: "24/ The uterine tube have:" }, options: { en: ["3 portions", "4 portions", "5 portions", "6 portions"] }, answer: { en: ["4 portions"] } },
+            { number: 25, type: "mcq", question: { en: "25/ Which one is the most common bacteria caused pneumonia?" }, options: { en: ["Staphylococcus aureus", "Mycoplasma pneumonia", "Streptococcus pneumoniae", "Klebsiella pneumonia"] }, answer: { en: ["Streptococcus pneumoniae"] } },
+            { number: 26, type: "mcq", question: { en: "26/ All the following are the predisposing factors of testicular cancer but except:" }, options: { en: ["History of mumps", "Phimosis", "Cryptorchidism", "Inguinal hernia during childhood"] }, answer: { en: ["Phimosis"] } },
+            { number: 27, type: "mcq", question: { en: "27/ All the following are advantages of PET with 18F-FDG Scan but except:" }, options: { en: ["Granulomatous conditions", "Skeletal infections", "Liver abscess", "Fever of unknown origin"] }, answer: { en: ["Liver abscess"] } },
+            { number: 28, type: "mcq", question: { en: "28/ All the following are the main pathogens of bacterial meningitis but except:" }, options: { en: ["Pseudomonas aeruginosa", "Haemophilus influenzae", "Streptococcus pneumoniae", "Neisseria meningitidis"] }, answer: { en: ["Pseudomonas aeruginosa"] } },
+            { number: 29, type: "mcq", question: { en: "29/ The breast examination will be done if possible:" }, options: { en: ["10 days after the menstruation", "6 days after the menstruation", "8 days after the menstruation", "12 days after the menstruation"] }, answer: { en: ["10 days after the menstruation"] } },
+            { number: 30, type: "mcq", question: { en: "30/ All the following are signs and symptoms of non tuberculosis pneumonia but except:" }, options: { en: ["Nights sweat", "Coughing", "Fever", "Chest pain"] }, answer: { en: ["Nights sweat"] } }
+        ];
+
+        let quizDataPart3 = [
+            { number: 31, type: "mcq", question: { en: "31/ All the following are the functions of endometrium but except:" }, options: { en: ["Provide the place for fertilization", "Site of glandular and vascular modification", "Site of placental development", "Site of implantation of blastocyst"] }, answer: { en: ["Provide the place for fertilization"] } },
+            { number: 32, type: "mcq", question: { en: "32/ All the following are the causes of rash but except:" }, options: { en: ["Toxic produced by organisms", "Autoimmune destruction", "Septic shock", "Multiplication of infective organism"] }, answer: { en: ["Septic shock"] } },
+            { number: 33, type: "mcq", question: { en: "33/ Petechial, purpuric eruptions is observed in:" }, options: { en: ["Acute meningococcemia", "Primary Herpes Infection", "Measles (Rubeola)", "Scarlet fever"] }, answer: { en: ["Acute meningococcemia"] } },
+            { number: 34, type: "mcq", question: { en: "34/ All the following are the infectious diseases having papulo-vesicular eruptions but except:" }, options: { en: ["Measles", "Varicella", "Impetigo", "Variola"] }, answer: { en: ["Measles"] } },
+            { number: 35, type: "mcq", question: { en: "35/ All the following are the infectious diseases having maculopapular eruptions but except:" }, options: { en: ["Rubella", "Measles", "Scarlet fever", "Chicken pox"] }, answer: { en: ["Chicken pox"] } },
+            { number: 36, type: "mcq", question: { en: "36/ All the following are the infectious diseases having ulcerative eruptions but except:" }, options: { en: ["Anthrax", "Tularemia", "Rickettsial Infections", "Echovirus 9 infection"] }, answer: { en: ["Echovirus 9 infection"] } },
+            { number: 37, type: "mcq", question: { en: "37/ All the following are the signs and symptoms of breast cancer but except:" }, options: { en: ["Hard mass in breast", "Skin retraction", "Mobile mass in breast", "Axillary lymphadenopathy"] }, answer: { en: ["Mobile mass in breast"] } },
+            { number: 38, type: "mcq", question: { en: "38/ All the following are the signs and symptoms of Systemic Inflammatory Response Syndrome but except:" }, options: { en: ["Leucocytosis", "Organ failure: cardiac, pulmonary, renal", "Fever", "Dizziness"] }, answer: { en: ["Dizziness"] } },
+            { number: 39, type: "mcq", question: { en: "39/ All the following are the infection prevention but except:" }, options: { en: ["Sterilization", "Hand hygiene", "Patient Isolation", "Fertilization"] }, answer: { en: ["Fertilization"] } },
+            { number: 40, type: "mcq", question: { en: "40/ Which part of cervix that is a target of HPV infection:" }, options: { en: ["Transformation zone", "Ectocervix", "Endocervix and Ectocervix", "Endocervix"] }, answer: { en: ["Transformation zone"] } },
+            { number: 41, type: "mcq", question: { en: "41/ All the following are the most common cancers of HIV/AIDS related cancer but (except):" }, options: { en: ["Lung cancer", "Kaposi sarcoma", "Non-Hodgkin lymphoma", "Cervical cancer"] }, answer: { en: ["Lung cancer"] } },
+            { number: 42, type: "mcq", question: { en: "42/ All the following are the infection prevention but except:" }, options: { en: ["Disinfection", "Serotherapy", "Vaccination for vaccine preventable diseases", "Injection equipment control"] }, answer: { en: ["Serotherapy"] } },
+            { number: 43, type: "mcq", question: { en: "43/ All the following are characteristics of nipple discharge related to breast cancer but except:" }, options: { en: ["One duct orifice", "Unilateral", "Bloody discharge", "Milky discharge"] }, answer: { en: ["Milky discharge"] } },
+            { number: 44, type: "mcq", question: { en: "44/ All the following are the criteria of appropriate use of antimicrobial agents but except:" }, options: { en: ["Obtaining an accurate diagnosis", "Determining the need for & timing of initial antimicrobial therapy", "Understanding how dosing", "Understanding about virulence factor of pathogen"] }, answer: { en: ["Understanding about virulence factor of pathogen"] } },
+            { number: 45, type: "mcq", question: { en: "45/ All the following are the causes of non menstrual bleeding in gynecology but except:" }, options: { en: ["Cervical lesions", "Endometrial cancer", "Dysfunctional bleeding", "Endometrial hyperplasia"] }, answer: { en: ["Dysfunctional bleeding"] } }
+        ];
+
+        let quizDataPart4 = [
+            { number: 46, type: "mcq", question: { en: "46/ All the following are clinical features of typhoid fever but except:" }, options: { en: ["GI symptoms-anorexia", "Dysuria", "Splenomegaly", "Constipation, diarrhea"] }, answer: { en: ["Dysuria"] } },
+            { number: 47, type: "mcq", question: { en: "47/ All the following are the infectious diseases having nodular eruptions but except:" }, options: { en: ["SWEET'S syndrome", "Tularemia", "Erythema nodosum", "Disseminated fungal infection"] }, answer: { en: ["Tularemia"] } },
+            { number: 48, type: "mcq", question: { en: "48/ All the following are signs and symptoms of pulmonary tuberculosis but except:" }, options: { en: ["Violent coughing", "Prolonged fever", "Low-grade fever", "Chest pain"] }, answer: { en: ["Prolonged fever"] } },
+            { number: 49, type: "mcq", question: { en: "49/ The length of uterine tube is:" }, options: { en: ["10 cm", "14 cm", "8 cm", "12 cm"] }, answer: { en: ["12 cm"] } },
+            { number: 50, type: "mcq", question: { en: "50/ All the following are the causative agents of sexually transmitted disease (STD) but except:" }, options: { en: ["Genital Herpes", "E coli", "Syphilis", "Chlamydia and Gonorrhea"] }, answer: { en: ["E coli"] } },
+            { number: 51, type: "mcq", question: { en: "51/ Causative agent of infective colitis is:" }, options: { en: ["Enterovirus", "Shigella", "H. pylori", "Giardia lamblia"] }, answer: { en: ["Shigella"] } },
+            { number: 52, type: "mcq", question: { en: "52/ Which one is the most common bacteria caused pharyngitis?" }, options: { en: ["Streptococcus beta hemolytic", "Streptococcus pyogenes", "Streptococcus pneumoniae", "Staphylococcus aureus"] }, answer: { en: ["Streptococcus pyogenes"] } },
+            { number: 53, type: "mcq", question: { en: "53/ The incubation period of rubella is:" }, options: { en: ["8 days", "21 days", "2 days", "18 days"] }, answer: { en: ["18 days"] } },
+            { number: 54, type: "mcq", question: { en: "54/ The principal causes of neonatal meningitis is:" }, options: { en: ["Aspergillus", "Listeria, Staph, Salmonella", "Group B streptococcus (S. agalactiae) and E coli", "Other Gram Negative Bacteria"] }, answer: { en: ["Group B streptococcus (S. agalactiae) and E coli"] } },
+            { number: 55, type: "mcq", question: { en: "55/ The most common of benign breast tumors is:" }, options: { en: ["Phyllodes tumor and ductal ectasia", "Intraductal papilloma and adenolipoma", "Fat necrosis and galactocele", "Fibroadenoma and cyst"] }, answer: { en: ["Fibroadenoma and cyst"] } },
+            { number: 56, type: "mcq", question: { en: "56/ All the following are signs and symptoms of influenza but except:" }, options: { en: ["Fever", "Dry cough", "Body aches", "Sneezing"] }, answer: { en: ["Sneezing"] } },
+            { number: 57, type: "mcq", question: { en: "57/ All the following are the conditions that should be doing breast examination but except:" }, options: { en: ["Engorged breast", "Inflammatory manifestation", "Mastodynia", "Breast tumor"] }, answer: { en: ["Engorged breast"] } },
+            { number: 58, type: "mcq", question: { en: "58/ All the following are the infectious diseases having maculopapular eruptions but except:" }, options: { en: ["Infectious mononucleosis", "Hand-foot-mouth syndrome", "Roseola infantum", "Chikungunya Virus"] }, answer: { en: ["Hand-foot-mouth syndrome"] } },
+            { number: 59, type: "mcq", question: { en: "59/ All the following are the infectious diseases having papulo-vesicular eruptions but except:" }, options: { en: ["Infectious mononucleosis", "Hand-foot-mouth syndrome", "Primary Herpes Infection", "Dissemination herpes"] }, answer: { en: ["Infectious mononucleosis"] } },
+            { number: 60, type: "mcq", question: { en: "60/ The corpus luteum is programmed to secrete progesterone for:" }, options: { en: ["2-14 days", "10-12 days", "8-10 days", "14-16 days"] }, answer: { en: ["10-12 days"] } }
+        ];
+
+        let quizDataPart5 = [
+            { number: 61, type: "mcq", question: { en: "61/ The prolapse of vaginal wall is:" }, options: { en: ["Cystocele", "Colpocele", "Elytrocele", "Procidentia"] }, answer: { en: ["Cystocele"] } },
+            { number: 62, type: "mcq", question: { en: "62/ Which one is lower respiratory infection?" }, options: { en: ["Pharyngitis", "Acute laryngotracheobronchitis", "Laryngotracheitis", "Epiglottitis"] }, answer: { en: ["Acute laryngotracheobronchitis"] } },
+            { number: 63, type: "mcq", question: { en: "63/ The menstrual cycle have:" }, options: { en: ["3 phases", "5 phases", "4 phases", "6 phases"] }, answer: { en: ["3 phases"] } },
+            { number: 64, type: "mcq", question: { en: "64/ All the following are the causes of vaginal discharge but except:" }, options: { en: ["Ovarian infection", "Uterine infection", "Tubal infection", "Cervical infection"] }, answer: { en: ["Ovarian infection"] } },
+            { number: 65, type: "mcq", question: { en: "65/ All the following are upper respiratory infections but except:" }, options: { en: ["Pharyngitis", "Sinusitis", "Acute rhinitis", "Stomatitis"] }, answer: { en: ["Stomatitis"] } },
+            { number: 66, type: "mcq", question: { en: "66/ MERS (Middle East Respiratory Syndrome) is caused by:" }, options: { en: ["Respiratory syncytial virus", "Rhinovirus", "Coronavirus", "Picornavirus"] }, answer: { en: ["Coronavirus"] } },
+            { number: 67, type: "mcq", question: { en: "67/ All the following are the causes of abnormal menstrual bleeding in gynecology but except:" }, options: { en: ["Endometrial hyperplasia", "Dysfunctional bleeding", "Coagulopathy", "Uterine pathology"] }, answer: { en: ["Endometrial hyperplasia"] } },
+            { number: 68, type: "mcq", question: { en: "68/ The hormone inhibin is secreted by:" }, options: { en: ["Interstitial cells", "Sertoli cells", "Sperm cells", "Leydig cells"] }, answer: { en: ["Sertoli cells"] } },
+            { number: 69, type: "mcq", question: { en: "69/ All the following are the nosocomial pathogens but except:" }, options: { en: ["Klebsiella pneumoniae", "Aspergillus", "Candida albicans", "Pseudomonas aeruginosa"] }, answer: { en: ["Aspergillus"] } },
+            { number: 70, type: "mcq", question: { en: "70/ The window period of HIV infection is:" }, options: { en: ["3-8 weeks", "8-10 weeks", "4-5 weeks", "3-4 weeks"] }, answer: { en: ["3-8 weeks"] } },
+            { number: 71, type: "mcq", question: { en: "71/ Which one is the croup?" }, options: { en: ["Acute laryngotracheobronchitis", "Pharyngitis", "Laryngotracheitis", "Epiglottis"] }, answer: { en: ["Acute laryngotracheobronchitis"] } },
+            { number: 72, type: "mcq", question: { en: "72/ All the following are the major nosocomial infection but except:" }, options: { en: ["Surgical site infection", "Central line-associated bacteremia", "Clostridium perfringens infection", "Ventilator associated pneumonia"] }, answer: { en: ["Ventilator associated pneumonia"] } },
+            { number: 73, type: "mcq", question: { en: "73/ All the following are the major nosocomial infection but except:" }, options: { en: ["Surgical site infection", "Central line-associated bacteremia", "Clostridium perfringens infection", "Ventilator-associated pneumonia"] }, answer: { en: ["Clostridium perfringens infection"] } },
+            { number: 74, type: "mcq", question: { en: "74/ Pneumocystis pneumonia (PCP) or pneumocystosis is a form of pneumonia, caused by:" }, options: { en: ["Pneumocystis jiroveci", "Alveolar pneumococcal germ", "Streptococcus pneumoniae", "Pneumococcus"] }, answer: { en: ["Pneumocystis jiroveci"] } },
+            { number: 75, type: "mcq", question: { en: "75/ All the following are the signs and symptoms of Acute HIV infection but except:" }, options: { en: ["Lymphadenopathy", "Rash", "Constipation", "Fever"] }, answer: { en: ["Constipation"] } }
+        ];
+
+        let quizDataPart6 = [
+            { number: 76, type: "mcq", question: { en: "76/ All the following are the causes of pelvic pain but except:" }, options: { en: ["Asherman syndrome", "Mittelschmerz syndrome", "Dysmenorrhoea", "Ectopic pregnancy"] }, answer: { en: ["Asherman syndrome"] } },
+            { number: 77, type: "mcq", question: { en: "77/ All the following are the causes of nipple discharge but except:" }, options: { en: ["Galactocele", "Fibrocystic or cystic mastopathy", "Intraductal carcinoma", "Intraductal papilloma and Subareolar duct ectasia"] }, answer: { en: ["Galactocele"] } },
+            { number: 78, type: "mcq", question: { en: "78/ All the following are the infectious diseases having petechial purpuric eruptions but except:" }, options: { en: ["Coxsackie virus A9", "Echovirus 9 infection", "Variola", "Acute meningococcemia"] }, answer: { en: ["Acute meningococcemia"] } },
+            { number: 79, type: "mcq", question: { en: "79/ All the following are upper respiratory infections but except:" }, options: { en: ["Epiglottis", "Acute laryngotracheobronchitis", "Laryngotracheitis", "Pharyngitis"] }, answer: { en: ["Acute laryngotracheobronchitis"] } },
+            { number: 80, type: "mcq", question: { en: "80/ Most common causative agent of viral gastro-enteritis in infants and children is:" }, options: { en: ["Enterovirus", "Norovirus", "Rotavirus", "CMV"] }, answer: { en: ["Rotavirus"] } },
+            { number: 81, type: "mcq", question: { en: "81/ All the following are the causes of non menstrual bleeding but except:" }, options: { en: ["Post coital bleeding", "Anovulatory bleeding", "Intermenstrual bleeding", "Postmenopausal bleeding"] }, answer: { en: ["Anovulatory bleeding"] } },
+            { number: 82, type: "mcq", question: { en: "82/ All the following are the signs and symptoms of Acute HIV infection but except (Repeat):" }, options: { en: ["Lymphadenopathy", "Rash", "Constipation", "Fever"] }, answer: { en: ["Constipation"] } },
+            { number: 83, type: "mcq", question: { en: "83/ All the following are the major nosocomial infections but except (Repeat):" }, options: { en: ["Surgical site infection", "Central line-associated bacteremia", "Clostridium perfringens infection", "Ventilator-associated pneumonia"] }, answer: { en: ["Clostridium perfringens infection"] } },
+            { number: 84, type: "mcq", question: { en: "84/ All the following are the causes of pelvic pain but except (Repeat):" }, options: { en: ["Asherman syndrome", "Mittelschmerz syndrome", "Dysmenorrhoea", "Ectopic pregnancy"] }, answer: { en: ["Asherman syndrome"] } },
+            { number: 85, type: "mcq", question: { en: "85/ All the following are the causes of nipple discharge but except (Repeat):" }, options: { en: ["Galactocele", "Fibrocystic or cystic mastopathy", "Intraductal carcinoma", "Intraductal papilloma and Subareolar duct ectasia"] }, answer: { en: ["Galactocele"] } }
+        ];
+
+        let quizData;
+        let currentPart = 1;
+        let quizState = {};
+
+        // Sound Synthesis
+        const correctSynth = new Tone.Synth().toDestination();
+        const incorrectSynth = new Tone.Synth().toDestination();
+        let audioStarted = false;
+
+        // DOM Elements
+        const partButtons = [
+            document.getElementById('part1-btn'),
+            document.getElementById('part2-btn'),
+            document.getElementById('part3-btn'),
+            document.getElementById('part4-btn'),
+            document.getElementById('part5-btn'),
+            document.getElementById('part6-btn')
+        ];
+        
+        const quizView = document.getElementById('quiz-view');
+        const editView = document.getElementById('edit-view');
+        const practiceSheetBtn = document.getElementById('practice-sheet-btn');
+        const practiceSheetView = document.getElementById('practice-sheet-view');
+        const showAllBtn = document.getElementById('show-all-btn');
+        const allQuestionsView = document.getElementById('all-questions-view');
+        const editQuizBtn = document.getElementById('edit-quiz-btn');
+        const applyPreviewBtn = document.getElementById('apply-preview-btn');
+        const generateSaveCodeBtn = document.getElementById('generate-save-code-btn');
+        const cancelEditBtn = document.getElementById('cancel-edit-btn');
+        const addQuestionBtn = document.getElementById('add-question-btn');
+        const editQuestionsContainer = document.getElementById('edit-questions-container');
+        const editQuestionNavArea = document.getElementById('edit-question-navigation');
+        const exportArea = document.getElementById('export-area');
+        const exportOutput = document.getElementById('export-output');
+        const copyFeedbackEl = document.getElementById('copy-feedback');
+
+        const mainScoreTextEl = document.getElementById('main-score-text');
+        const questionNavArea = document.getElementById('question-navigation');
+        const questionArea = document.getElementById('question-area');
+        const questionNumberEl = document.getElementById('question-number');
+        const questionTextEl = document.getElementById('question-text');
+        const answerArea = document.getElementById('answer-area');
+        const feedbackArea = document.getElementById('feedback-area');
+        const nextBtn = document.getElementById('next-btn');
+        const prevBtn = document.getElementById('prev-btn');
+        const redoBtn = document.getElementById('redo-btn');
+        const redoPartBtn = document.getElementById('redo-part-btn');
+        const resultsArea = document.getElementById('results-area');
+        const resultsScoreEl = document.getElementById('results-score');
+        const summaryEl = document.getElementById('summary');
+        const restartBtn = document.getElementById('restart-btn');
+
+        let isAnswered = false;
+
+        async function startAudio() {
+            if (!audioStarted) {
+                await Tone.start();
+                audioStarted = true;
+            }
+        }
+        
+        function switchPart(part) {
+            currentPart = part;
+
+            partButtons.forEach((btn, idx) => {
+                if (idx === part - 1) {
+                    btn.classList.add('bg-indigo-600', 'text-white');
+                    btn.classList.remove('bg-white', 'text-gray-900');
+                } else {
+                    btn.classList.remove('bg-indigo-600', 'text-white');
+                    btn.classList.add('bg-white', 'text-gray-900');
+                }
+            });
+            
+            const datasets = [quizDataPart1, quizDataPart2, quizDataPart3, quizDataPart4, quizDataPart5, quizDataPart6];
+            quizData = datasets[part-1];
+            
+            document.getElementById('quiz-subtitle').textContent = `Medical Semiology 4 (${quizData.length} questions)`;
+            loadQuizView();
+        }
+
+        function updateScoreText() {
+            mainScoreTextEl.innerHTML = `Score: ${quizState[currentPart].score} / ${quizData.length}`;
+        }
+
+        function initializeQuiz() {
+            quizState = {};
+            for(let i=1; i<=6; i++) {
+                quizState[i] = { userAnswers: [], score: 0, currentQuestionIndex: 0 };
+            }
+            switchPart(currentPart); 
+        }
+        
+        function loadQuizView() {
+            quizView.classList.remove('hidden');
+            editView.classList.add('hidden');
+            practiceSheetView.classList.add('hidden');
+            allQuestionsView.classList.add('hidden');
+            
+            questionNavArea.classList.remove('hidden');
+            questionArea.classList.remove('hidden');
+            answerArea.classList.remove('hidden');
+            resultsArea.classList.add('hidden');
+
+            renderQuestionButtons();
+            showQuestion();
+            updateScoreText();
+        }
+
+        function renderQuestionButtons() {
+            questionNavArea.innerHTML = '';
+            quizData.forEach((question, index) => {
+                const button = document.createElement('button');
+                button.textContent = index + 1;
+                button.classList.add('question-nav-btn', 'border-2', 'border-gray-300', 'rounded-md');
+                button.addEventListener('click', () => {
+                    quizState[currentPart].currentQuestionIndex = index;
+                    showQuestion();
+                });
+                questionNavArea.appendChild(button);
+            });
+        }
+        
+        function updateQuestionButtonStyles() {
+            const buttons = Array.from(questionNavArea.children);
+            buttons.forEach((button, index) => {
+                button.classList.remove('active', 'answered-correct', 'answered-incorrect');
+                if (quizState[currentPart].userAnswers[index]) {
+                    if(quizState[currentPart].userAnswers[index].isCorrect) {
+                        button.classList.add('answered-correct');
+                    } else {
+                        button.classList.add('answered-incorrect');
+                    }
+                }
+            });
+            const currentQuestionIndex = quizState[currentPart].currentQuestionIndex;
+            if(buttons[currentQuestionIndex]) {
+                buttons[currentQuestionIndex].classList.add('active');
+            }
+        }
+
+        function showQuestion() {
+            resetState();
+            const currentQuestionIndex = quizState[currentPart].currentQuestionIndex;
+            const userAnswers = quizState[currentPart].userAnswers;
+            const currentQuestion = quizData[currentQuestionIndex];
+            isAnswered = userAnswers[currentQuestionIndex] !== undefined;
+
+            if (isAnswered) redoBtn.classList.remove('hidden');
+
+            questionNumberEl.innerHTML = `Question ${currentQuestionIndex + 1}/${quizData.length}`;
+            questionTextEl.innerHTML = currentQuestion.question.en;
+            
+            answerArea.className = 'flex flex-col gap-4';
+            const optionsGrid = document.createElement('div');
+            optionsGrid.className = 'grid grid-cols-1 md:grid-cols-2 gap-4 w-full';
+            
+            const correctAnswers = Array.isArray(currentQuestion.answer.en) ? currentQuestion.answer.en.map(a=>a.trim()) : [currentQuestion.answer.en.trim()];
+            
+            currentQuestion.options.en.forEach((optionEn) => {
+                const button = document.createElement('button');
+                button.innerHTML = `<span>${optionEn}</span>`;
+                button.classList.add('option-btn', 'w-full', 'p-4', 'border-2', 'border-gray-300', 'rounded-lg', 'text-left', 'hover:bg-gray-100');
+                
+                button.addEventListener('click', () => {
+                    if (isAnswered) return;
+                    button.classList.toggle('selected');
+                    const selectedButtons = Array.from(optionsGrid.querySelectorAll('button.selected'));
+                    if (selectedButtons.length === correctAnswers.length) {
+                        checkMcqAnswer(currentQuestionIndex, optionsGrid, feedbackArea);
+                    }
+                });
+
+                if(isAnswered) {
+                    button.disabled = true;
+                    const userAnswerData = userAnswers[currentQuestionIndex];
+                    const isThisCorrectOption = correctAnswers.includes(optionEn.trim());
+                    const wasSelected = userAnswerData.answers && userAnswerData.answers.includes(optionEn.trim());
+                    if (isThisCorrectOption) button.classList.add('correct');
+                    else if (wasSelected) button.classList.add('incorrect');
+                }
+                optionsGrid.appendChild(button);
+            });
+            answerArea.appendChild(optionsGrid);
+            updateQuestionButtonStyles();
+            updateButtonVisibility();
+        }
+        
+        function resetState() {
+            feedbackArea.textContent = '';
+            answerArea.innerHTML = '';
+            redoBtn.classList.add('hidden');
+        }
+
+        function updateButtonVisibility() {
+            const currentQuestionIndex = quizState[currentPart].currentQuestionIndex;
+            prevBtn.classList.toggle('hidden', currentQuestionIndex === 0);
+            const allAnswered = quizState[currentPart].userAnswers.filter(Boolean).length === quizData.length;
+            nextBtn.classList.toggle('hidden', allAnswered);
+            if (currentQuestionIndex === quizData.length - 1 || allAnswered) {
+                 nextBtn.innerHTML = `<span class="font-semibold">Show Results</span>`;
+            } else {
+                 nextBtn.innerHTML = `<span class="font-semibold">Next Question</span>`;
+            }
+        }
+
+        async function checkMcqAnswer(questionIndex, optionsContainer, feedbackEl) {
+            await startAudio();
+            if (quizState[currentPart].userAnswers[questionIndex]) return;
+
+            const selectedButtons = Array.from(optionsContainer.querySelectorAll('button.selected'));
+            const selectedTexts = selectedButtons.map(btn => btn.querySelector('span').textContent.trim());
+            const currentQuestion = quizData[questionIndex];
+            const correctAnswers = Array.isArray(currentQuestion.answer.en) ? currentQuestion.answer.en.map(a => a.trim()) : [currentQuestion.answer.en.trim()];
+
+            const isCorrect = selectedTexts.length === correctAnswers.length && selectedTexts.every(val => correctAnswers.includes(val));
+
+            if (isCorrect) {
+                quizState[currentPart].score++;
+                correctSynth.triggerAttackRelease("C5", "8n", Tone.now());
+                if (feedbackEl) {
+                    feedbackEl.innerHTML = `Correct!`;
+                    feedbackEl.className = 'mt-2 text-center text-md font-medium text-green-600 practice-feedback';
+                }
+            } else {
+                const now = Tone.now();
+                incorrectSynth.triggerAttackRelease("G3", "16n", now);
+                incorrectSynth.triggerAttackRelease("F#3", "8n", now + 0.1);
+                if (feedbackEl) {
+                    feedbackEl.innerHTML = `Wrong! Correct answer: <strong>${correctAnswers.join(', ')}</strong>`;
+                    feedbackEl.className = 'mt-2 text-center text-sm font-medium text-red-600 practice-feedback';
+                }
+            }
+
+            const allButtons = optionsContainer.querySelectorAll('button.option-btn');
+            allButtons.forEach(btn => {
+                btn.disabled = true;
+                btn.classList.remove('selected', 'hover:bg-gray-100');
+                const btnText = btn.querySelector('span').textContent.trim();
+                if (correctAnswers.includes(btnText)) btn.classList.add('correct');
+                else if (selectedTexts.includes(btnText)) btn.classList.add('incorrect');
+            });
+
+            quizState[currentPart].userAnswers[questionIndex] = { isCorrect, answers: selectedTexts };
+            if (!practiceSheetView.classList.contains('hidden')) {
+                document.getElementById(`ps-redo-btn-${questionIndex}`).classList.remove('hidden');
+            } else redoBtn.classList.remove('hidden');
+            
+            updateScoreText();
+            updateQuestionButtonStyles();
+            updateButtonVisibility();
+        }
+        
+        function renderPracticeSheet() {
+            practiceSheetView.innerHTML = ''; 
+            const title = document.createElement('h2');
+            title.className = 'text-3xl font-bold text-center mb-6 text-gray-800';
+            title.textContent = `Practice Sheet - Part ${currentPart}`;
+            practiceSheetView.appendChild(title);
+
+            quizData.forEach((q, index) => {
+                const questionDiv = document.createElement('div');
+                questionDiv.id = `ps-question-${index}`;
+                questionDiv.className = 'mb-6 p-4 border rounded-lg bg-gray-50';
+                
+                const questionHeader = document.createElement('div');
+                questionHeader.className = 'flex justify-between items-start gap-4 mb-4';
+                
+                const questionTitle = document.createElement('p');
+                questionTitle.className = 'font-bold text-lg text-gray-900 flex-grow';
+                questionTitle.innerHTML = q.question.en;
+                
+                const prRedoBtn = document.createElement('button');
+                prRedoBtn.id = `ps-redo-btn-${index}`;
+                prRedoBtn.textContent = 'Redo';
+                prRedoBtn.className = 'hidden bg-yellow-500 text-white font-bold py-1 px-4 rounded-lg hover:bg-yellow-600 text-sm shrink-0';
+                prRedoBtn.addEventListener('click', () => redoPracticeSheetQuestion(index));
+                
+                questionHeader.appendChild(questionTitle);
+                questionHeader.appendChild(prRedoBtn);
+                questionDiv.appendChild(questionHeader);
+
+                const answersContainer = document.createElement('div');
+                const feedbackEl = document.createElement('div');
+                feedbackEl.className = 'practice-feedback mt-2';
+
+                const optionsGrid = document.createElement('div');
+                optionsGrid.className = 'grid grid-cols-1 md:grid-cols-2 gap-3';
+                const correctAnswers = Array.isArray(q.answer.en) ? q.answer.en.map(a=>a.trim()) : [q.answer.en.trim()];
+
+                q.options.en.forEach(optionEn => {
+                    const button = document.createElement('button');
+                    button.innerHTML = `<span>${optionEn}</span>`;
+                    button.className = 'option-btn w-full p-3 border-2 border-gray-300 rounded-lg text-left hover:bg-gray-100 bg-white';
+                    button.addEventListener('click', () => {
+                        if (!quizState[currentPart].userAnswers[index]) {
+                            button.classList.toggle('selected');
+                            const selectedButtons = Array.from(optionsGrid.querySelectorAll('button.selected'));
+                            if (selectedButtons.length === correctAnswers.length) checkMcqAnswer(index, optionsGrid, feedbackEl);
+                        }
+                    });
+                    optionsGrid.appendChild(button);
+                });
+                
+                answersContainer.appendChild(optionsGrid);
+                questionDiv.appendChild(answersContainer);
+                questionDiv.appendChild(feedbackEl);
+                practiceSheetView.appendChild(questionDiv);
+
+                if (quizState[currentPart].userAnswers[index]) {
+                    prRedoBtn.classList.remove('hidden');
+                    const userAnswerData = quizState[currentPart].userAnswers[index];
+                    const buttons = optionsGrid.querySelectorAll('.option-btn');
+                    buttons.forEach(button => {
+                        button.disabled = true;
+                        button.classList.remove('selected', 'hover:bg-gray-100');
+                        const optionText = button.querySelector('span').textContent.trim();
+                        if (correctAnswers.includes(optionText)) button.classList.add('correct');
+                        else if (userAnswerData.answers && userAnswerData.answers.includes(optionText)) button.classList.add('incorrect');
+                    });
+                }
+            });
+            
+            const backBtn = document.createElement('button');
+            backBtn.className = 'mt-8 bg-indigo-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-indigo-700 transition-colors duration-300 shadow-lg block mx-auto';
+            backBtn.innerHTML = '<span class="font-semibold">Back to Quiz</span>';
+            backBtn.addEventListener('click', togglePracticeSheetView);
+            practiceSheetView.appendChild(backBtn);
+        }
+
+        function togglePracticeSheetView() {
+            const isHiding = !practiceSheetView.classList.contains('hidden');
+            if (isHiding) {
+                practiceSheetView.classList.add('hidden');
+                quizView.classList.remove('hidden');
+                practiceSheetBtn.textContent = 'Practice Sheet';
+                showQuestion();
+            } else {
+                quizView.classList.add('hidden');
+                practiceSheetView.classList.remove('hidden');
+                allQuestionsView.classList.add('hidden');
+                practiceSheetBtn.textContent = 'Back to Quiz';
+                renderPracticeSheet();
+            }
+        }
+
+        function redoPracticeSheetQuestion(questionIndex) {
+            const answerData = quizState[currentPart].userAnswers[questionIndex];
+            if (!answerData) return;
+            if (answerData.isCorrect) quizState[currentPart].score--;
+            quizState[currentPart].userAnswers[questionIndex] = undefined;
+            updateScoreText();
+            updateQuestionButtonStyles();
+            const container = document.getElementById(`ps-question-${questionIndex}`);
+            const buttons = container.querySelectorAll('.option-btn');
+            buttons.forEach(btn => {
+                btn.disabled = false;
+                btn.classList.remove('correct', 'incorrect', 'selected');
+                btn.classList.add('hover:bg-gray-100');
+            });
+            container.querySelector('.practice-feedback').innerHTML = '';
+            document.getElementById(`ps-redo-btn-${questionIndex}`).classList.add('hidden');
+        }
+
+        function toggleAllQuestionsView() {
+            const isHiding = !allQuestionsView.classList.contains('hidden');
+            if (isHiding) {
+                allQuestionsView.classList.add('hidden');
+                quizView.classList.remove('hidden');
+                showAllBtn.textContent = 'Show Answers';
+            } else {
+                quizView.classList.add('hidden');
+                practiceSheetView.classList.add('hidden');
+                allQuestionsView.classList.remove('hidden');
+                showAllBtn.textContent = 'Back to Quiz';
+                renderAllQuestions();
+            }
+        }
+
+        function renderAllQuestions() {
+            allQuestionsView.innerHTML = ''; 
+            const title = document.createElement('h2');
+            title.className = 'text-3xl font-bold text-center mb-6 text-gray-800';
+            title.textContent = `All Questions & Answers - Part ${currentPart}`;
+            allQuestionsView.appendChild(title);
+
+            quizData.forEach((q, index) => {
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'mb-6 p-4 border rounded-lg bg-gray-50';
+                let contentHTML = `<p class="font-bold text-lg mb-2">${q.question.en}</p>`;
+                contentHTML += '<ul class="list-disc list-inside space-y-1">';
+                const correctAnswers = Array.isArray(q.answer.en) ? q.answer.en.map(a=>a.trim()) : [q.answer.en.trim()];
+                q.options.en.forEach(option => {
+                    const isCorrect = correctAnswers.includes(option.trim());
+                    contentHTML += `<li class="${isCorrect ? 'text-green-700 font-semibold' : 'text-gray-700'}">${option}${isCorrect ? ' &check;' : ''}</li>`;
+                });
+                contentHTML += '</ul>';
+                questionDiv.innerHTML = contentHTML;
+                allQuestionsView.appendChild(questionDiv);
+            });
+            
+            const backBtn = document.createElement('button');
+            backBtn.className = 'mt-8 bg-indigo-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-indigo-700 transition-colors duration-300 shadow-lg block mx-auto';
+            backBtn.innerHTML = 'Back to Quiz';
+            backBtn.addEventListener('click', toggleAllQuestionsView);
+            allQuestionsView.appendChild(backBtn);
+        }
+
+        function showResults() {
+            questionNavArea.classList.add('hidden');
+            questionArea.classList.add('hidden');
+            answerArea.classList.add('hidden');
+            nextBtn.classList.add('hidden');
+            prevBtn.classList.add('hidden');
+            redoBtn.classList.add('hidden');
+            resultsArea.classList.remove('hidden');
+            resultsScoreEl.innerHTML = `Your final score is ${quizState[currentPart].score} out of ${quizData.length}.`;
+            summaryEl.innerHTML = `<div class="text-center mb-4"><h3 class="text-xl font-bold text-gray-700">Review Your Answers:</h3></div>`; 
+            
+            quizState[currentPart].userAnswers.forEach((ua, index) => {
+                if (!ua) return;
+                const qData = quizData[index];
+                const resultDiv = document.createElement('div');
+                resultDiv.classList.add('mb-4', 'p-3', 'rounded-md', ua.isCorrect ? 'bg-blue-100' : 'bg-red-100');
+                const correctAnswerText = Array.isArray(qData.answer.en) ? qData.answer.en.join(', ') : qData.answer.en;
+                resultDiv.innerHTML = `<p class="font-semibold">${qData.question.en}</p>
+                    <p class="text-sm mt-2 ${ua.isCorrect ? 'text-blue-700' : 'text-red-700'}">Your answer: ${ua.answers.join(', ')}</p>
+                    ${!ua.isCorrect ? `<p class="text-sm text-gray-600">Correct: ${correctAnswerText}</p>` : ''}`;
+                summaryEl.appendChild(resultDiv);
+            });
+        }
+
+        function redoQuestion() {
+            const currentQuestionIndex = quizState[currentPart].currentQuestionIndex;
+            const answerData = quizState[currentPart].userAnswers[currentQuestionIndex];
+            if (!answerData) return;
+            if (answerData.isCorrect) quizState[currentPart].score--;
+            quizState[currentPart].userAnswers[currentQuestionIndex] = undefined;
+            updateScoreText();
+            showQuestion();
+        }
+
+        function redoPart() {
+            quizState[currentPart] = { userAnswers: [], score: 0, currentQuestionIndex: 0 };
+            loadQuizView();
+        }
+
+        function toggleEditMode() {
+            quizView.classList.toggle('hidden');
+            editView.classList.toggle('hidden');
+            if (!editView.classList.contains('hidden')) renderEditView();
+        }
+
+        function renderEditView() {
+            editQuestionsContainer.innerHTML = '';
+            editQuestionNavArea.innerHTML = '';
+            quizData.forEach((q, index) => {
+                const navButton = document.createElement('button');
+                navButton.textContent = index + 1;
+                navButton.className = 'question-nav-btn border-2 border-gray-300 rounded-md';
+                navButton.addEventListener('click', () => document.getElementById(`edit-q-${index}`).scrollIntoView({ behavior: 'smooth' }));
+                editQuestionNavArea.appendChild(navButton);
+                
+                const qDiv = document.createElement('div');
+                qDiv.id = `edit-q-${index}`;
+                qDiv.className = 'border p-4 rounded-lg mb-4 bg-gray-50 scroll-mt-4';
+                qDiv.innerHTML = `
+                    <div class="flex justify-between items-center mb-2">
+                        <p class="font-bold">Question ${index + 1}</p>
+                        <button class="bg-red-500 text-white px-3 py-1 rounded" onclick="quizData.splice(${index}, 1); renderEditView();">Delete</button>
+                    </div>
+                    <textarea class="edit-input w-full p-2 border rounded" id="edit-text-${index}">${q.question.en}</textarea>
+                    <div class="mt-2 space-y-2">
+                        ${q.options.en.map((opt, oIdx) => `
+                            <div class="flex items-center gap-2">
+                                <input type="checkbox" id="check-${index}-${oIdx}" ${q.answer.en.includes(opt) ? 'checked' : ''}>
+                                <input type="text" class="w-full p-1 border rounded" id="opt-${index}-${oIdx}" value="${opt}">
+                            </div>
+                        `).join('')}
+                    </div>`;
+                editQuestionsContainer.appendChild(qDiv);
+            });
+        }
+
+        function applyToPreview() {
+            const newQuestions = [];
+            editQuestionsContainer.querySelectorAll('.border').forEach((div, idx) => {
+                const qText = div.querySelector('textarea').value;
+                const opts = [];
+                const ans = [];
+                const inputFields = div.querySelectorAll('input[type="text"]');
+                inputFields.forEach((input, iIdx) => {
+                    const optVal = input.value;
+                    if(optVal) {
+                        opts.push(optVal);
+                        if(document.getElementById(`check-${idx}-${iIdx}`).checked) ans.push(optVal);
+                    }
+                });
+                newQuestions.push({ number: idx+1, type: 'mcq', question: {en: qText}, options: {en: opts}, answer: {en: ans}});
+            });
+            const datasets = [quizDataPart1, quizDataPart2, quizDataPart3, quizDataPart4, quizDataPart5, quizDataPart6];
+            datasets[currentPart-1] = newQuestions;
+            quizData = newQuestions;
+            toggleEditMode();
+            initializeQuiz();
+        }
+
+        function generateSaveCode() {
+            const varName = `quizDataPart${currentPart}`;
+            exportOutput.value = `let ${varName} = ${JSON.stringify(quizData, null, 4)};`;
+            exportArea.classList.remove('hidden');
+        }
+
+        // Event Listeners
+        partButtons.forEach((btn, idx) => btn.addEventListener('click', () => switchPart(idx + 1)));
+        practiceSheetBtn.addEventListener('click', togglePracticeSheetView);
+        showAllBtn.addEventListener('click', toggleAllQuestionsView);
+        prevBtn.addEventListener('click', () => {
+            if (quizState[currentPart].currentQuestionIndex > 0) {
+                quizState[currentPart].currentQuestionIndex--;
+                showQuestion();
+            }
+        });
+        nextBtn.addEventListener('click', () => {
+            const allAnswered = quizState[currentPart].userAnswers.filter(Boolean).length === quizData.length;
+            if (quizState[currentPart].currentQuestionIndex < quizData.length - 1 && !allAnswered) {
+                quizState[currentPart].currentQuestionIndex++;
+                showQuestion();
+            } else showResults();
+        });
+        restartBtn.addEventListener('click', initializeQuiz);
+        redoBtn.addEventListener('click', redoQuestion);
+        redoPartBtn.addEventListener('click', redoPart);
+        editQuizBtn.addEventListener('click', toggleEditMode);
+        applyPreviewBtn.addEventListener('click', applyToPreview);
+        generateSaveCodeBtn.addEventListener('click', generateSaveCode);
+        cancelEditBtn.addEventListener('click', toggleEditMode);
+        exportOutput.addEventListener('click', () => {
+            exportOutput.select();
+            document.execCommand('copy');
+            copyFeedbackEl.textContent = 'Code copied!';
+            setTimeout(() => { copyFeedbackEl.textContent = '' }, 2000);
+        });
+
+        initializeQuiz();
+    </script>
+</body>
+</html>
